@@ -1,64 +1,65 @@
 *** Settings ***
-Documentation       Fill data from Excel to web form
+Documentation       Fill Data From Excel Into Web Form
 
-Library             RPA.Excel
 Library             RPA.Browser.Selenium
 Library             RPA.Excel.Files
+Library             RPA.Desktop
+Library             fill_data.py    WITH NAME    FillData
 
 
 *** Variables ***
 ${EXCEL_FILE}       /Users/m143/Documents/RPA_challenger/challenge.xlsx
-${URL}              https://www.rpachallenge.com/
-${WAIT_FOR_LOAD}    5s
+${URL_RPA}          https://www.rpachallenge.com/
+${WAIT_FOR_LOAD}    1S
 
 
 *** Tasks ***
 Fill Data From Excel
-    Open Workbook    ${EXCEL_FILE}    read_only=True
-    ${data}    Read Worksheet    header=True
-    Open Browser    ${URL}
-    Wait Until Page Contains Element    css:.btn.uiColorButton
-
-    FOR    ${row}    IN    @{data}
-        ${first_name}    Set Variable If    '${row["First Name"]}'!='None'    ${row["First Name"]}    ""
-        ${last_name}    Set Variable If    '${row["Last Name "]}'!='None'    ${row["Last Name "]}    ""
-        ${company_name}    Set Variable If    '${row["Company Name"]}'!='None'    ${row["Company Name"]}    ""
-        ${role}    Set Variable If    '${row["Role in Company"]}'!='None'    ${row["Role in Company"]}    ""
-        ${address}    Set Variable If    '${row["Address"]}'!='None'    ${row["Address"]}    ""
-        ${email}    Set Variable If    '${row["Email"]}'!='None'    ${row["Email"]}    ""
-        ${phone}    Set Variable If    '${row["Phone Number"]}'!='None'    ${row["Phone Number"]}    ""
-
-        # Kiểm tra nếu các biến đều rỗng thì thoát khỏi vòng lặp
-        IF    '${first_name}' == '' AND '${last_name}' == '' AND '${company_name}' == '' AND '${role}' == '' AND '${address}' == '' AND '${email}' == '' AND '${phone}' == ''
-            BREAK
-        ELSE
-            Log
-            ...    Filling data for: ${first_name} ${last_name}
-            ...    Fill Input Fields
-            ...    ${first_name}
-            ...    ${last_name}
-            ...    ${company_name}
-            ...    ${role}
-            ...    ${address}
-            ...    ${email}
-            ...    ${phone}
-            ...    Click Submit Button
-            ...    Wait Until Page Contains Element
-            ...    css:.btn.uiColorButton
-        END
-    END
+    Open the website
+    Fill Data From Excel Into Web Form For Each Row
+    ${c}=    Add Num    1    2
+    Log    ${c}
 
 
 *** Keywords ***
-Fill Input Fields
-    [Arguments]    ${first_name}    ${last_name}    ${company_name}    ${role}    ${address}    ${email}    ${phone}
-    Input Text    css:[ng-reflect-name="labelFirstName"]    ${first_name}
-    Input Text    css:[ng-reflect-name="labelLastName"]    ${last_name}
-    Input Text    css:[ng-reflect-name="labelCompanyName"]    ${company_name}
-    Input Text    css:[ng-reflect-name="labelRole"]    ${role}
-    Input Text    css:[ng-reflect-name="labelAddress"]    ${address}
-    Input Text    css:[ng-reflect-name="labelEmail"]    ${email}
-    Input Text    css:[ng-reflect-name="labelPhone"]    ${phone}
+Open the website
+    Open Available Browser    ${URL_RPA}
+    Click Button    Start
 
-Click Submit Button
-    Click Element    css:.btn.uiColorButton
+Fill Data From Excel Into Web Form
+    # ${data_challenge}: A dictionary containing data from the Excel file
+    [Arguments]    ${data_challenge}
+    # """
+    # Fill data from Excel file into web form:
+    # - Input 'First Name', 'Last Name', 'Company Name', 'Role in Company', 'Address', 'Email', and 'Phone Number'
+    # - Wait until 'Submit' button is visible, then click it.
+    # """
+    Input Text    css:[ng-reflect-name="labelFirstName"]    ${data_challenge}[First Name]
+    Input Text    css:[ng-reflect-name="labelLastName"]    ${data_challenge}[Last Name]
+    Input Text    css:[ng-reflect-name="labelCompanyName"]    ${data_challenge}[Company Name]
+    Input Text    css:[ng-reflect-name="labelRole"]    ${data_challenge}[Role in Company]
+    Input Text    css:[ng-reflect-name="labelAddress"]    ${data_challenge}[Address]
+    Input Text    css:[ng-reflect-name="labelEmail"]    ${data_challenge}[Email]
+    Input Text    css:[ng-reflect-name="labelPhone"]    ${data_challenge}[Phone Number]
+    Wait Until Element Is Visible    css:input.btn.uiColorButton[type='submit']    ${WAIT_FOR_LOAD}
+    Click Button    Submit
+
+Fill Data From Excel Into Web Form For Each Row
+    Open Workbook    challenge.xlsx
+    ${data_challenges}=    Read Worksheet As Table    header=True
+    Close Workbook
+    # """
+    # Fill Data From Excel Into Web Form For Each Row
+    # - Open the Excel workbook 'challenge.xlsx'
+    # - Read the data from each row of the Excel file as a table with headers
+    # - For each row in the Excel data:
+    #    -- Fill data from the current row into the web form
+    # """
+    FOR    ${data_challenge}    IN    @{data_challenges}
+        Fill Data From Excel Into Web Form    ${data_challenge}
+    END
+
+Custom Fill Data From Excel Into Web Form
+    [Arguments]    ${data_challenge}
+    ${result}=    Add Num 1 2
+    RETURN    ${result}
