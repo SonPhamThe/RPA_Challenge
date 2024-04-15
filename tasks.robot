@@ -61,8 +61,3 @@ Fill Data From Excel Into Web Form For Each Row
     FOR    ${data_challenge}    IN    @{data_challenges}
         Fill Data From Excel Into Web Form    ${data_challenge}
     END
-
-Custom Fill Data From Excel Into Web Form
-    [Arguments]    ${data_challenge}
-    ${result}=    Add Num 1 2
-    RETURN    ${result}
