@@ -4,7 +4,8 @@ Documentation       Fill Data From Excel Into Web Form
 Library             RPA.Browser.Selenium
 Library             RPA.Excel.Files
 Library             RPA.Desktop
-Library             fill_data.py    WITH NAME    FillData
+# Import fill_data.py to use the add_num function
+Library             fill_data.py
 
 
 *** Variables ***
@@ -17,6 +18,8 @@ ${WAIT_FOR_LOAD}    1S
 Fill Data From Excel
     Open the website
     Fill Data From Excel Into Web Form For Each Row
+    # This test case verifies the correctness of the add_num function in fill_data.py
+    # Call the add_num function with ${a} and ${b}
     ${c}=    Add Num    1    2
     Log    ${c}
 
